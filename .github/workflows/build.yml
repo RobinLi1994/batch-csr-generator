@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS Intel
-          - os: macos-latest
+          # macOS Intel (使用 macos-13 因为它是 Intel 机器)
+          - os: macos-13
             target: x86_64-apple-darwin
             name: macos-intel
           # macOS Apple Silicon
@@ -43,9 +43,17 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install dependencies (macOS)
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
         run: |
           rustup target add ${{ matrix.target }}
+          brew install openssl@3
+          echo "OPENSSL_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
+
+      - name: Install OpenSSL (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install openssl -y
+          echo "OPENSSL_DIR=C:\Program Files\OpenSSL-Win64" >> $env:GITHUB_ENV
 
       - name: Install frontend dependencies
         run: npm install

@@ -129,55 +129,6 @@ rustup target add x86_64-pc-windows-msvc
 # 或使用 CI/CD 服务（如 GitHub Actions）
 ```
 
-#### 使用 GitHub Actions 自动构建
-
-创建 `.github/workflows/build.yml`:
-
-```yaml
-name: Build
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            target: universal-apple-darwin
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Rust
-        uses: dtolnay/rust-action@stable
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run tauri build
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}-build
-          path: |
-            src-tauri/target/release/bundle/
-```
-
 ## 项目结构
 
 ```

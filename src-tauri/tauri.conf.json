@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "批量CSR生成器",
+  "productName": "Batch-CSR-Generator",
   "version": "1.0.0",
   "identifier": "com.csr.batch-generator",
   "build": {
@@ -37,7 +37,10 @@
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
-      "timestampUrl": ""
+      "timestampUrl": "",
+      "wix": {
+        "language": "zh-CN"
+      }
     },
     "macOS": {
       "minimumSystemVersion": "10.13"

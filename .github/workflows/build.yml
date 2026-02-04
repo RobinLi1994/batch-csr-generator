@@ -2,8 +2,13 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    paths:
+      - '**/*'
+      - '!.github/workflows/**'
+      - '!README.md'
+      - '!LICENSE'
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -18,15 +23,15 @@ jobs:
         uses: dev-drprasad/delete-tag-and-release@v1.0
         with:
           delete_release: true
-          tag_name: ${{ github.ref_name || 'latest' }}
+          tag_name: releases
           github_token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name || 'latest' }}
-          name: 'Batch-CSR-Generator ${{ github.ref_name || ''latest'' }}'
+          tag_name: releases
+          name: Releases
           body: |
             ## 批量CSR生成器 / Batch CSR Generator
             
@@ -94,8 +99,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name || 'latest' }}
-          releaseName: 'Batch-CSR-Generator ${{ github.ref_name || ''latest'' }}'
+          tagName: releases
+          releaseName: Releases
           releaseBody: ''
           releaseDraft: false
           prerelease: false

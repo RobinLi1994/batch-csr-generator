@@ -4,12 +4,48 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  # 先清理旧的 release，避免多 job 并发冲突
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete existing release (if exists)
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        with:
+          delete_release: true
+          tag_name: ${{ github.ref_name || 'latest' }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name || 'latest' }}
+          name: 'Batch-CSR-Generator ${{ github.ref_name || ''latest'' }}'
+          body: |
+            ## 批量CSR生成器 / Batch CSR Generator
+            
+            **下载说明 / Download Guide:**
+            - **Windows**: 下载 `.msi` 或 `.exe` 文件
+            - **macOS Intel**: 下载 `_x64.dmg` 文件
+            - **macOS Apple Silicon (M1/M2/M3)**: 下载 `_aarch64.dmg` 文件
+            
+            ⚠️ **macOS "应用已损坏" 解决方法:**
+            ```bash
+            xattr -cr /Applications/Batch-CSR-Generator.app
+            ```
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: cleanup
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +72,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: lts/*
           cache: 'npm'
 
       - name: Install Rust stable
@@ -58,10 +94,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Batch-CSR-Generator ${{ github.ref_name }}'
-          releaseBody: '请查看 CHANGELOG.md 了解更新内容。'
-          releaseDraft: true
+          tagName: ${{ github.ref_name || 'latest' }}
+          releaseName: 'Batch-CSR-Generator ${{ github.ref_name || ''latest'' }}'
+          releaseBody: ''
+          releaseDraft: false
           prerelease: false
           args: --target ${{ matrix.target }}
 
